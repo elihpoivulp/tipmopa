@@ -51,4 +51,21 @@ class Users extends BaseController
             ]) .
             view('includes/footer');
     }
+
+    public function info($id): string
+    {
+        $user_model = model(User::class);
+        return view('includes/page-header') .
+            $this->get_heading() .
+            get_sidebar() .
+            view('account/admin/user_info', [
+                'customer' => $user_model->find($id),
+            ]) .
+            view('includes/footer');
+    }
+
+    public function travel_history($id)
+    {
+        echo 'travel history';
+    }
 }

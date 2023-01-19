@@ -26,8 +26,8 @@
                                             Select
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">See User Details</a></li>
-                                            <li><a class="dropdown-item" href="#">See Travel History</a></li>
+                                            <li><a class="dropdown-item" href="<?= url_to('admin-users-info', $user['id']); ?>">See User Details</a></li>
+                                            <li><a class="dropdown-item" href="<?= url_to('admin-users-travel-history', $user['id']); ?>">See Travel History</a></li>
                                             <li><a class="dropdown-item" href="#">Edit</a></li>
                                             <li><a class="dropdown-item" href="#"><span class="text-danger">Delete</span></a></li>
                                         </ul>

@@ -35,6 +35,8 @@ $routes->group('', static function ($routes) {
         $routes->get('', 'Admin\\Admin::index', ['as' => 'admin-dashboard']);
         $routes->get('users/create-new', 'Admin\\Users::create_new', ['as' => 'admin-users-register']);
         $routes->post('users/register', 'Admin\\Users::save', ['as' => 'admin-users-register']);
+        $routes->get('users/info/(:num)', 'Admin\\Users::info/$1', ['as' => 'admin-users-info']);
+        $routes->get('users/travel-history/(:num)', 'Admin\\Users::travel_history/$1', ['as' => 'admin-users-travel-history']);
         $routes->get('users/(:alpha)', 'Admin\\Users::users_list/$1', ['as' => 'users-list']);
         $routes->get('reservations', 'Admin\\Users::reservations', ['as' => 'admin-reservations']);
     });

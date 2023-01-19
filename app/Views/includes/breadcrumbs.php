@@ -3,7 +3,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?= url_to('customer-dashboard'); ?>">Home</a></li>
-            <?php if ($segments_count == 3): ?>
+            <?php if ($segments_count >= 3): ?>
                 <li class="breadcrumb-item"><?= $active; ?></li>
                 <?php if (!$sub_is_int): ?>
                     <li class="breadcrumb-item active"><?= str_replace('-', ' ', $sub); ?></li>

@@ -46,7 +46,7 @@ function get_sidebar(): string
         'active' => $active,
         'sub' => $sub,
         'breadcrumbs' => view('includes/breadcrumbs', [
-            'current_page' => ucfirst($sub != '' && !$sub_is_int ? ucfirst($sub) : ucfirst($active)),
+            'current_page' => ucfirst($sub != '' && !$sub_is_int && $uri->getTotalSegments() == 3 ? ucfirst($sub) : ucfirst($active)),
             'segments_count' => $uri->getTotalSegments(),
             'active' => ucfirst($active),
             'sub' => ucfirst($sub),
