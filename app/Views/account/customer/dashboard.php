@@ -1,13 +1,5 @@
 <main id="main" class="main">
-    <div class="pagetitle">
-        <h1><?= $current_page ?? 'Dashboard'; ?></h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="<?= url_to('customer-dashboard'); ?>">Home</a></li>
-                <li class="breadcrumb-item active"><?= $current_page ?? 'Dashboard'; ?></li>
-            </ol>
-        </nav>
-    </div>
+    <?= $breadcrumbs; ?>
     <section class="section dashboard">
         <div class="row">
             <div class="col-lg-4">

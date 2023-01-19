@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use CodeIgniter\Test\Fabricator;
+use Exception;
+use Faker\Generator;
 use ReflectionException;
 
 class Reservation extends Model
@@ -47,6 +50,22 @@ class Reservation extends Model
            s.tti_start,
            s.tti_end';
 
+    public function get_all_reservations($today = true): array
+    {
+        $query = $this->select($this->select_string . ', u.name as customer_name')
+            ->join('locations l', 'l.id = reservations.destination')
+            ->join('locations ll', 'll.id = reservations.origin')
+            ->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id')
+            ->join('boats b', 'b.id = ts.boat_id')
+            ->join('schedules s', 's.id = ts.schedule_id')
+            ->join('users u', 'u.id = reservations.user_id')
+            ->orderBy('reservations.id', 'desc');
+            if ($today) {
+                $query->where('date(reservations.created_at) = ', date('Y-m-d'));
+            }
+            return $query->findAll();
+    }
+
     public function get_customer_reservations($user_id = null, $date = null): array
     {
         if (is_null($user_id)) {
@@ -62,6 +81,7 @@ class Reservation extends Model
             ->join('boats b', 'b.id = ts.boat_id')
             ->join('schedules s', 's.id = ts.schedule_id')
             ->where('reservations.user_id', $user_id)
+            ->where('date(reservations.created_at) = ', $date)
             ->orderBy('reservations.id', 'desc')
             ->findAll();
     }
@@ -84,6 +104,7 @@ class Reservation extends Model
             ->join('users c', 'c.id = reservations.user_id')
             ->where('u.id', $user_id)
             ->where('reservations.accepted', 0)
+            ->where('date(reservations.created_at) = ', $date)
             ->orderBy('reservations.id', 'asc')
             ->findAll();
     }
@@ -143,5 +164,98 @@ class Reservation extends Model
         } catch (ReflectionException $e) {
             return false;
         }
+    }
+
+    public function get_total_sales($today = true, $id = null)
+    {
+        $query = $this->selectSum('payment', 'total');
+        if ($id) {
+            $query->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id')
+                ->join('boats b', 'b.id = ts.boat_id')
+                ->join('users u', 'u.id = b.operator_id')
+                ->where('u.id', $id);
+        }
+        if ($today) {
+            $query->where('date(date_accepted) =', date('Y-m-d'));
+        }
+        return $query->first();
+    }
+
+    public function get_total_customers($today = true, $id = null)
+    {
+        $query = $this->selectCount('id', 'total');
+        if ($id) {
+            $query->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id')
+                ->join('boats b', 'b.id = ts.boat_id')
+                ->join('users u', 'u.id = b.operator_id')
+                ->where('u.id', $id);
+        }
+        if ($today) {
+            $query->where('date(created_at) =', date('Y-m-d'));
+        }
+        return $query->first();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function fake(Generator &$faker): array
+    {
+        $price_per_location = [
+            2 => 30,
+            3 => 30,
+            4 => 40,
+            5 => 40,
+        ];
+        $inserted = [];
+        $user_id = random_int(1, \model(User::class)->countAllResults());
+        $trip_schedules_model = \model(TripSchedule::class);
+        for ($i = 1; $i <= $trip_schedules_model->countAllResults(); $i++) {
+            $schedule = $trip_schedules_model->find($i);
+            if ($schedule['schedule_date'] != date('Y-m-d')) {
+                $parent_schedule = \model(Schedule::class)->find($schedule['schedule_id']);
+                $start_id = $schedule['start_location_id'];
+                $origin = 1;
+                $reference = make_reference();
+                $destination = mt_rand(2, 5);
+                $payment = $price_per_location[$destination];
+                $time_start = $parent_schedule['tti_start'];
+                $time_end = $parent_schedule['tti_end'];
+                if ($start_id !== 1) {
+                    $origin = mt_rand(2, 5);
+                    $destination = 1;
+                    $payment = $price_per_location[$origin];
+                    $time_start = $parent_schedule['itt_start'];
+                    $time_end = $parent_schedule['itt_end'];
+                }
+                $date_start = $schedule['schedule_date'] . ' ' . $time_start;
+                $date_end = $schedule['schedule_date'] . ' ' . $time_end;
+                $img = '1673581108_b3ed7b7bacc2af55ae8a.jpg';
+                $data = [
+                    'reference_no' => $reference,
+                    'accepted' => 1,
+                    'fulfilled' => 1,
+                    'boarded' => 1,
+                    'cancelled' => 0,
+                    'updated_at' => $date_end,
+                    'receipt_img' => $img,
+                    'date_refunded' => null,
+                    'created_at' => $date_start,
+                    'destination' => $destination,
+                    'origin' => $origin,
+                    'user_id' => $user_id,
+                    'date_cancelled' => null,
+                    'payment' => $payment,
+                    'date_accepted' => $date_start,
+                    'date_fulfilled' => $date_end,
+                    'trip_schedule_id' => $i,
+                    'refunded' => 0,
+                    'date_boarded' => $date_start,
+                ];
+                $this->save($data);
+                $inserted[] = $data;
+            }
+        }
+       return $inserted;
     }
 }

@@ -6,6 +6,8 @@ use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Database\RawSql;
 use CodeIgniter\Model;
 use CodeIgniter\Validation\ValidationInterface;
+use Exception;
+use Faker\Generator;
 use ReflectionException;
 
 class TripSchedule extends Model
@@ -51,9 +53,13 @@ class TripSchedule extends Model
         if ($to_terminal) {
             $order = 's.tti_start';
         }
-        return $this->select($this->select_string)
+        $select = $this->select_string;
+        $select .= new RawSql(', if(start_location_id = 1, "Terminal", l.name) as origin_location');
+        $select .= new RawSql(', if(start_location_id = 1, "Isla", "Terminal") as destination_location');
+        return $this->select($select)
             ->join('boats b', 'b.id = trip_schedules.boat_id')
             ->join('schedules s', 's.id = trip_schedules.schedule_id')
+            ->join('locations l', 'l.id = start_location_id')
             ->join('users u', 'u.id = b.operator_id')
             ->where('trip_schedules.schedule_date', date('Y-m-d'))
             ->orderBy($order)
@@ -112,5 +118,39 @@ class TripSchedule extends Model
         } catch (ReflectionException $e) {
             return false;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function fake(Generator &$faker): array
+    {
+        $data = [
+            [1, 1, 2],
+            [2, 2, 3],
+            [3, 3, 4],
+            [4, 4, 5],
+            [5, 5, 1],
+            [6, 6, 1],
+            [7, 7, 1],
+            [8, 8, 1],
+        ];
+        $inserted = [];
+        for ($i = 1; $i < date('d'); $i++) {
+            foreach ($data as $row) {
+                $record = [
+                    'boat_id' => $row[0],
+                    'schedule_id' => $row[1],
+                    'start_location_id' => $row[2],
+                    'departed_1' => 1,
+                    'departed_2' => 1,
+                    'schedule_date' => '2023-01-' . sprintf('%02d', $i)
+                ];
+                $inserted[] = $record;
+                $this->save($record);
+            }
+        }
+
+        return $inserted;
     }
 }

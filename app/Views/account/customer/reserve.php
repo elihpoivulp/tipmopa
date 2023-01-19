@@ -1,13 +1,5 @@
 <main id="main" class="main">
-    <div class="pagetitle">
-        <h1><?= $current_page ?? 'Dashboard'; ?></h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="<?= url_to('customer-dashboard'); ?>">Home</a></li>
-                <li class="breadcrumb-item active"><?= $current_page ?? 'Dashboard'; ?></li>
-            </ol>
-        </nav>
-    </div>
+    <?= $breadcrumbs; ?>
     <section class="section profile">
         <div class="row">
             <div class="col-xl-4">
@@ -72,7 +64,7 @@
                                     <div class="row">
                                         <div class="col-lg-5 col-md-4 col-5 label"><strong>Cost</strong></div>
                                         <div class="col-lg-7 col-md-8 col-7">
-                                            ₱ <?= $location['fare_price_in_peso']; ?></div>
+                                             <?= peso_sign() . ' ' . $location['fare_price_in_peso']; ?></div>
                                     </div>
                                 </div>
                                 <div class="col-12 mt-4">

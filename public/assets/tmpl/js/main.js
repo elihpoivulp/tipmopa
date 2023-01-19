@@ -300,10 +300,14 @@
    */
   const datatables = select('.datatable', true)
   datatables.forEach(datatable => {
-    new simpleDatatables.DataTable(datatable, {
-      perPage: 5
+    const dt = new simpleDatatables.DataTable(datatable, {
+      perPage: 5,
+    });
+    document.getElementById('export-table').addEventListener('click', function () {
+      dt.export({type: 'csv', download: true, columnDelimiter: ';'})
     });
   })
+
 
   /**
    * Autoresize echart charts

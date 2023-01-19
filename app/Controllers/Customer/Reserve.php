@@ -28,7 +28,7 @@ class Reserve extends BaseController
         $destination = $location->find($this->request->getGet('location'));
         return view('includes/page-header') .
             $this->get_heading() .
-            view('includes/sidebar') .
+            get_sidebar() .
             view('account/customer/reserve', [
                 'current_page' => ucfirst(explode('/', uri_string())[1]),
                 'trip_info' => $ts->get_schedule_info_for_booking($id, $location),

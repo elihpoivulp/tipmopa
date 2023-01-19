@@ -52,11 +52,12 @@ class Schedules extends BaseController
             $reservation_model = model(Reservation::class);
             if ($point == 3) {
                 $point_key = 'last_point_date_arrived';
-                // $reservation_model->update(session()->get('sailing_boat_data')['id'], [
-                //     'fulfilled' => 1,
-                //     'date_fulfilled' => date('Y-m-d H:i:s'),
-                //     'updated_at' => date('Y-m-d H:i:s')
-                // ]);
+                $this->notification->create_notification(
+                    session()->get('id'),
+                    'Schedule has been fulfilled.',
+                    0,
+                    'reservation-fulfilled'
+                );
                 model(TripSchedule::class)->update($trip_schedule_id, [session()->get('sailing_boat_data')['depart_type'] == 1 ? 'departed_1' : 'departed_2' => 1]);
             }
             $update_data = [
@@ -76,12 +77,14 @@ class Schedules extends BaseController
                     'reservation-fulfilled'
                 );
             }
-            $reservation_model->set([
-                'fulfilled' => 1,
-                'date_fulfilled' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ])->whereIn('id', array_column($users, 'user_id'))
-                    ->update();
+            $user_ids = array_column($users, 'user_id');
+            if (!empty($user_ids)) {
+                $updated = $reservation_model->set([
+                    'fulfilled' => 1,
+                    'date_fulfilled' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ])->whereIn('user_id', $user_ids)->update();
+            }
         } catch (ReflectionException $e) {
             exit($e->getMessage());
         }

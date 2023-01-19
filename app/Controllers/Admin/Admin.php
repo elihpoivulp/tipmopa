@@ -9,25 +9,22 @@ use App\Models\TripSchedule;
 
 class Admin extends BaseController
 {
-    public function index()
+    public function index(): string
     {
-        $trip_schedule_model = model(TripSchedule::class);
         $reservation_model = model(Reservation::class);
-        $location_model = model(Location::class)->findAll();
-        $upcoming = $trip_schedule_model->get_upcoming();
+        $trip_schedule_model = model(TripSchedule::class);
         $itt = $trip_schedule_model->get_scheduled_today();
         $tti = $trip_schedule_model->get_scheduled_today(1);
-        $reservations = $reservation_model->get_customer_reservations();
+        $total_sales_today = $reservation_model->get_total_sales();
+        $total_customers_today = $reservation_model->get_total_customers();
         return view('includes/page-header') .
             $this->get_heading() .
-            view('includes/sidebar') .
-            view('account/customer/dashboard', [
-                'scheduled' => $upcoming,
+            get_sidebar() .
+            view('account/admin/dashboard', [
                 'itt' => $itt,
                 'tti' => $tti,
-                'locations' => $location_model,
-                'reservations' => $reservations,
-                'reservation_columns' => array_column($reservations, 'schedule_id')
+                'total_sales_today' => $total_sales_today['total'],
+                'total_customers_today' => $total_customers_today['total']
             ]) .
             view('includes/footer');
     }

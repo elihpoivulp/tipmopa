@@ -28,7 +28,7 @@ class Customer extends BaseController
         $journey = $this->get_journey_view();
         return view('includes/page-header') .
             $this->get_heading() .
-            view('includes/sidebar') .
+            get_sidebar() .
             view('account/customer/dashboard', [
                 'scheduled' => $upcoming,
                 'my_upcoming' => $my_upcoming,

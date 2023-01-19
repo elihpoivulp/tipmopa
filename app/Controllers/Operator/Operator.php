@@ -22,7 +22,7 @@ class Operator extends BaseController
         $journey = $this->get_journey_view();
         return view('includes/page-header') .
             $this->get_heading() .
-            view('includes/sidebar') .
+            get_sidebar() .
             view('account/operator/dashboard', [
                 'reservations' => $reservation_model->get_operator_reservations(),
                 'upcoming' => $upcoming,

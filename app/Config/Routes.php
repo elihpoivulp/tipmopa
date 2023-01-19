@@ -12,6 +12,7 @@ $routes->setTranslateURIDashes(false);
 $routes->set404Override();
 $routes->setAutoRoute(false);
 $routes->get('/', 'Welcome::index');
+$routes->get('generate', 'GenerateTestData::index');
 $routes->get('login', 'Login::index', ['as' => 'login']);
 $routes->post('login', 'Login::action');
 $routes->post('logout', 'Logout::action', ['as' => 'logout', 'filter' => 'auth']);
@@ -32,6 +33,10 @@ $routes->group('', static function ($routes) {
     });
     $routes->group('admin', ['filter' => 'admin_only'], static function ($routes) {
         $routes->get('', 'Admin\\Admin::index', ['as' => 'admin-dashboard']);
+        $routes->get('users/create-new', 'Admin\\Users::create_new', ['as' => 'admin-users-register']);
+        $routes->post('users/register', 'Admin\\Users::save', ['as' => 'admin-users-register']);
+        $routes->get('users/(:alpha)', 'Admin\\Users::users_list/$1', ['as' => 'users-list']);
+        $routes->get('reservations', 'Admin\\Users::reservations', ['as' => 'admin-reservations']);
     });
 
     $routes->post('notification/mark-seen/(:num)', 'Notifications::mark_seen/$1', ['as' => 'notifications-mark_seen']);
