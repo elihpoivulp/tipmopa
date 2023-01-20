@@ -39,6 +39,9 @@
                     </table>
                 </div>
                 <div class="card-footer">
+                    <div class="d-sm-none d-md-block">
+                        <button class="btn btn-success float-start" id="export-table" data-exclude-columns="actions">Export CSV</button>
+                    </div>
                     <a href="<?= url_to('admin-users-register'); ?>" class="btn float-end btn-primary">Create New</a>
                 </div>
             </div>

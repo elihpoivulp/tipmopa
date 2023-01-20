@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CodeIgniter\Database\RawSql;
 use CodeIgniter\Model;
 use CodeIgniter\Test\Fabricator;
 use Exception;
@@ -196,6 +197,26 @@ class Reservation extends Model
         return $query->first();
     }
 
+    public function get_travel_history($id = null): array
+    {
+        $sql = 'reservations.reference_no, u.name, b.boat_name, ts.schedule_date as schedule_date';
+        $sql .= new RawSql(', (select name from locations where id = reservations.origin) as origin');
+        $sql .= new RawSql(', (select name from locations where id = reservations.destination) as destination');
+        $sql .= new RawSql(', if(reservations.origin = 1, concat(s.tti_start, \'-\', s.tti_end), concat(s.itt_start, \'-\', s.itt_end)) as time
+        ');
+        $query = $this->select($sql)
+            ->join('users u', 'reservations.user_id = u.id')
+            ->join('trip_schedules ts', 'reservations.trip_schedule_id = ts.id')
+            ->join('boats b', 'ts.boat_id = b.id')
+            ->join('schedules s', 's.id = ts.schedule_id');
+        if (!is_null($id)) {
+            $query->where('u.id', $id);
+        }
+        $query->where('reservations.fulfilled', 1);
+        $query->orderBy('ts.schedule_date', 'desc');
+        return $query->findAll();
+    }
+
     /**
      * @throws Exception
      */
@@ -221,7 +242,7 @@ class Reservation extends Model
                 $payment = $price_per_location[$destination];
                 $time_start = $parent_schedule['tti_start'];
                 $time_end = $parent_schedule['tti_end'];
-                if ($start_id !== 1) {
+                if ($start_id > 1) {
                     $origin = mt_rand(2, 5);
                     $destination = 1;
                     $payment = $price_per_location[$origin];

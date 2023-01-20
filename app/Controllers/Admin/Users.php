@@ -66,6 +66,14 @@ class Users extends BaseController
 
     public function travel_history($id)
     {
-        echo 'travel history';
+        $reservations_model = model(Reservation::class);
+        return view('includes/page-header') .
+            $this->get_heading() .
+            get_sidebar() .
+            view('account/admin/user_travel_history', [
+                'trips' => $reservations_model->get_travel_history($id),
+                'user_name' => model(User::class)->find($id)['name']
+            ]) .
+            view('includes/footer');
     }
 }
