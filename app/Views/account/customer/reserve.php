@@ -148,6 +148,7 @@
                                 <input type="hidden" name="payment" value="<?= $location['fare_price_in_peso']; ?>">
                                 <input type="hidden" name="origin" value="<?= $travel_type == 'in' ? 1 : $location['id']; ?>">
                                 <input type="hidden" name="destination" value="<?= $travel_type == 'out' ? 1 : $location['id']; ?>">
+                                <input type="hidden" name="type" value="<?= $travel_type; ?>">
                                 <h5>Instruction</h5>
                                 <p>To process your reservation, you need to send payment to the GCash number below.</p>
                                 <p>After the successful transaction, please send your receipt by attaching it to the

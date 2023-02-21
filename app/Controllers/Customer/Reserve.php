@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\Location;
 use App\Models\Notification;
 use App\Models\Reservation;
+use App\Models\Schedule;
 use App\Models\TripSchedule;
 use App\Models\User;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -54,7 +55,7 @@ class Reserve extends BaseController
                 'destination' => $this->request->getPost('destination'),
                 'payment' => $this->request->getPost('payment'),
                 'receipt_img' => $this->filename,
-                'depart_type' => $this->request->getPost('depart_type'),
+                'type' => $this->request->getPost('type')
             ];
             try {
                 $result = model(Reservation::class)->make_reservation($data);
@@ -125,5 +126,46 @@ class Reserve extends BaseController
             throw new PageNotFoundException();
         }
         return redirect()->back();
+    }
+
+    public function future(): string
+    {
+        $trip_schedule_model = model(TripSchedule::class);
+        $reservation_model = model(Reservation::class);
+        $itt = $trip_schedule_model->get_scheduled_today();
+        $tti = $trip_schedule_model->get_scheduled_today(1);
+        $reservations = $reservation_model->get_customer_reservations();
+        return view('includes/page-header') .
+            $this->get_heading() .
+            get_sidebar() .
+            view('account/customer/reserve_future', [
+                'dates' => $trip_schedule_model->get_future_dates_with_schedule(),
+                'itt' => $itt,
+                'tti' => $tti,
+                'locations' => model(Location::class)->findAll(),
+                'reservation_columns' => array_column($reservations, 'schedule_id'),
+            ]) .
+            view('includes/footer');
+    }
+
+    public function future_redirect(): RedirectResponse
+    {
+        $schedule_model = model(Schedule::class);
+
+        $type = key_exists('itt', $this->request->getPost()) ? 'itt' : 'tti';
+        $depart_type = $type === 'itt' ? 'departed_2' : 'departed_1';
+        $travel_type = $type === 'itt' ? 'out' : 'in';
+        $time = date('H:i:s', strtotime($this->request->getPost()[$type]));
+        $date = $this->request->getPost()['date'];
+        $location = $this->request->getPost()['location'];
+
+        $id = $schedule_model->get_sched_id($type, $time, $date)['id'];
+
+        if ($id > 0 || !is_null($id)) {
+            $url = url_to('customer-reserve', $id);
+            return redirect()->to($url . '?type=' . $depart_type . '&travel_type=' . $travel_type . '&location=' . $location);
+        } else {
+            throw new PageNotFoundException();
+        }
     }
 }

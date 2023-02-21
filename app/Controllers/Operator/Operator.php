@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Models\Location;
 use App\Models\Reservation;
 use App\Models\TripSchedule;
-use CodeIgniter\Database\RawSql;
 
 class Operator extends BaseController
 {
@@ -20,6 +19,8 @@ class Operator extends BaseController
             $minutes = get_time_diff(strtotime($upcoming[$upcoming['origin'] ? 'tti_start' : 'itt_start']));
         }
         $journey = $this->get_journey_view();
+        $total_sales_today = $reservation_model->get_total_sales(true, session()->get('id'));
+        $total_customers_today = $reservation_model->get_total_customers(true, session()->get('id'));
         return view('includes/page-header') .
             $this->get_heading() .
             get_sidebar() .
@@ -27,7 +28,9 @@ class Operator extends BaseController
                 'reservations' => $reservation_model->get_operator_reservations(),
                 'upcoming' => $upcoming,
                 'minutes' => $minutes,
-                'journey' => $journey ?? ''
+                'journey' => $journey ?? '',
+                'total_sales_today' => $total_sales_today['total'],
+                'total_customers_today' => $total_customers_today['total']
             ]) .
             view('includes/footer');
     }

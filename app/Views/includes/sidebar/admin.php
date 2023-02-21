@@ -30,6 +30,21 @@
                     </a>
                 </li>
             </ul>
+            <a class="nav-link <?= $active == 'schedules' ? '' : 'collapsed'; ?>" data-bs-target="#schedules-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-alarm"></i><span>Schedules</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="schedules-nav" class="nav-content collapse <?= $active == 'schedules' ? 'show' : ''; ?>" data-bs-parent="#sidebar-nav">
+                <li class="active">
+                    <a href="<?= url_to('admin-schedules'); ?>" class=" <?= $sub == 'all' ? 'active' : ''; ?>">
+                        <span>Schedules</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= url_to('admin-generate-schedule'); ?>" class=" <?= $sub == 'generate-schedule' ? 'active' : ''; ?>">
+                        <span>Generate Schedule</span>
+                    </a>
+                </li>
+            </ul>
         </li>
 
         <li class="nav-heading">Account</li>

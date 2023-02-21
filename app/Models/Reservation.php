@@ -5,6 +5,7 @@ namespace App\Models;
 use CodeIgniter\Database\RawSql;
 use CodeIgniter\Model;
 use CodeIgniter\Test\Fabricator;
+use Config\Database;
 use Exception;
 use Faker\Generator;
 use ReflectionException;
@@ -32,6 +33,7 @@ class Reservation extends Model
         'trip_schedule_id',
         'refunded',
         'date_boarded',
+        'type'
     ];
 
     private string $select_string = '
@@ -61,10 +63,10 @@ class Reservation extends Model
             ->join('schedules s', 's.id = ts.schedule_id')
             ->join('users u', 'u.id = reservations.user_id')
             ->orderBy('reservations.id', 'desc');
-            if ($today) {
-                $query->where('date(reservations.created_at) = ', date('Y-m-d'));
-            }
-            return $query->findAll();
+        if ($today) {
+            $query->where('date(reservations.created_at) = ', date('Y-m-d'));
+        }
+        return $query->findAll();
     }
 
     public function get_customer_reservations($user_id = null, $date = null): array
@@ -184,7 +186,7 @@ class Reservation extends Model
 
     public function get_total_customers($today = true, $id = null)
     {
-        $query = $this->selectCount('id', 'total');
+        $query = $this->selectCount('reservations.id', 'total');
         if ($id) {
             $query->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id')
                 ->join('boats b', 'b.id = ts.boat_id')
@@ -192,7 +194,7 @@ class Reservation extends Model
                 ->where('u.id', $id);
         }
         if ($today) {
-            $query->where('date(created_at) =', date('Y-m-d'));
+            $query->where('date(reservations.created_at) =', date('Y-m-d'));
         }
         return $query->first();
     }
@@ -277,6 +279,87 @@ class Reservation extends Model
                 $inserted[] = $data;
             }
         }
-       return $inserted;
+        return $inserted;
+    }
+
+    public function get_customers_monthly_stat($operator_id = null): array
+    {
+        // where b.operator_id = $operator_id
+        return Database::connect()->query(sprintf('select count(user_id) as cnt, if(destination = 1, ll.name, l.name) as location, month(reservations.created_at) as mth
+from reservations
+         join trip_schedules ts on ts.id = reservations.trip_schedule_id
+         join boats b on ts.boat_id = b.id
+         join users u on b.operator_id = u.id
+         join locations l on reservations.destination = l.id
+         join locations ll on reservations.origin = ll.id
+         %s
+         group by destination, month(reservations.created_at)
+         order by month(reservations.created_at);', (!is_null(
+            $operator_id) ? ' where b.operator_id = ' . $operator_id : '')))->getResultArray();
+    }
+
+    public function get_customers($user_id = null): array
+    {
+        if (is_null($user_id)) {
+            $user_id = session()->get('id');
+        }
+        return $this->select($this->select_string . ', c.name as customer, c.id as customer_id')
+            ->join('locations l', 'l.id = reservations.destination')
+            ->join('locations ll', 'll.id = reservations.origin')
+            ->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id')
+            ->join('boats b', 'b.id = ts.boat_id')
+            ->join('schedules s', 's.id = ts.schedule_id')
+            ->join('users u', 'u.id = b.operator_id')
+            ->join('users c', 'c.id = reservations.user_id')
+            ->where('b.operator_id', $user_id)
+            // ->where('reservations.accepted', 0)
+            ->orderBy('reservations.id', 'asc')
+            ->findAll();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function get_sales($today = false, $user_id = null): array
+    {
+        $template = 'ifnull((select sum(payment) from reservations r %5$s where ((r.destination = %1$d and r.origin = %2$d) or (r.origin = %1$d and r.destination = %2$d)) %3$s), 0) as "%4$s", ';
+        $query = '';
+        $locations = [
+            5 => 'Ticulio',
+            4 => 'Navotas',
+            3 => 'Pipindan',
+            2 => 'Kalinawan'
+        ];
+        $where = '';
+        $join = '';
+        if ($today) {
+            $where = 'and r.created_at = now()';
+        }
+        if (!is_null($user_id)) {
+            $join = 'join trip_schedules ts on ts.id = r.trip_schedule_id';
+            $join .= ' join boats b on b.id = ts.boat_id';
+            $join .= ' join users u on u.id = b.operator_id ';
+            $where .= ' and b.operator_id = ' . $user_id;
+        }
+        for ($i = 5; $i >= 2; $i--) {
+            $query .= sprintf($template, $i, 1, $where, $locations[$i], $join);
+        }
+        $query = rtrim($query, ', ');
+        $query = 'select ' . $query . ' from dual';
+        return Database::connect()->query($query)->getResultArray()[0];
+    }
+
+    public function get_sales_all_time_grouped($user_id = null): array
+    {
+        $q = $this->selectSum('payment')
+            ->select('month(reservations.created_at) as mth')
+            ->groupBy('month(reservations.created_at)');
+        if (!is_null($user_id)) {
+            $q->join('trip_schedules ts', 'ts.id = reservations.trip_schedule_id');
+            $q->join('boats b', 'b.id = ts.boat_id');
+            $q->join('users u', 'u.id = b.operator_id');
+            $q->where('b.operator_id', $user_id);
+        }
+        return $q->findAll();
     }
 }

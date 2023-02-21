@@ -6,14 +6,26 @@
                 <span>Dashboard</span>
             </a>
         </li>
-
-        <li class="nav-heading">Account</li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="<?= current_url() . '/profile'; ?>">
-                <i class="bi bi-person"></i>
-                <span>Profile</span>
+            <a class="nav-link <?= $active == 'customers' ? '' : 'collapsed'; ?>" href="<?= url_to('operator-customer-list'); ?>">
+                <i class="bi bi-file-person-fill"></i>
+                <span>Customers</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $active == 'sales' ? '' : 'collapsed'; ?>" href="<?= url_to('operator-sales'); ?>">
+                <i class="bi bi-currency-dollar"></i>
+                <span>Sales</span>
+            </a>
+        </li>
+
+        <li class="nav-heading">Account</li>
+<!--        <li class="nav-item">-->
+<!--            <a class="nav-link collapsed" href="--><?php //= current_url() . '/profile'; ?><!--">-->
+<!--                <i class="bi bi-person"></i>-->
+<!--                <span>Profile</span>-->
+<!--            </a>-->
+<!--        </li>-->
         <li class="nav-item">
             <form action="<?= url_to('logout'); ?>" method="post" id="logout_form">
                 <?= csrf_field() ?>

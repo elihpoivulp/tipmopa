@@ -71,6 +71,12 @@ class CreateReservations extends Migration
                 'constraint' => '11',
                 'unsigned' => true
             ],
+            'type' => [
+                'type' => 'enum',
+                'constraint' => ['in', 'out'],
+                'null' => false,
+                'default' => 'in'
+            ],
             'receipt_img' => [
                 'type' => 'varchar',
                 'constraint' => '255',

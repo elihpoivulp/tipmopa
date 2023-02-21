@@ -55,7 +55,7 @@ class TripSchedule extends Model
         }
         $select = $this->select_string;
         $select .= new RawSql(', if(start_location_id = 1, "Terminal", l.name) as origin_location');
-        $select .= new RawSql(', if(start_location_id = 1, "Isla", "Terminal") as destination_location');
+        $select .= new RawSql(', if(start_location_id != 1, "Terminal", "Isla") as destination_location');
         return $this->select($select)
             ->join('boats b', 'b.id = trip_schedules.boat_id')
             ->join('schedules s', 's.id = trip_schedules.schedule_id')
@@ -77,6 +77,27 @@ class TripSchedule extends Model
             ->join('users u', 'u.id = b.operator_id')
             ->where('trip_schedules.id', $schedule_id)
             ->first();
+    }
+
+    public function get_schedules($to_terminal = 0, $today = false): array
+    {
+        if ($today) {
+            return $this->get_scheduled_today($to_terminal);
+        }
+        $order = 's.itt_start';
+        if ($to_terminal) {
+            $order = 's.tti_start';
+        }
+        $select = $this->select_string;
+        $select .= new RawSql(', if(start_location_id = 1, "Terminal", l.name) as origin_location');
+        $select .= new RawSql(', if(start_location_id = 1, "Isla", "Terminal") as destination_location');
+        return $this->select($select)
+            ->join('boats b', 'b.id = trip_schedules.boat_id')
+            ->join('schedules s', 's.id = trip_schedules.schedule_id')
+            ->join('locations l', 'l.id = start_location_id')
+            ->join('users u', 'u.id = b.operator_id')
+            ->orderBy($order)
+            ->findAll();
     }
 
     public function get_upcoming($id = null, $customer = false): ?array
@@ -152,5 +173,14 @@ class TripSchedule extends Model
         }
 
         return $inserted;
+    }
+
+    public function get_future_dates_with_schedule(): array
+    {
+        return $this->select('schedule_date')
+            ->where('schedule_date >=', date('Y-m-d'))
+            ->groupBy('schedule_date')
+            ->orderBy('schedule_date', 'asc')
+            ->findAll();
     }
 }

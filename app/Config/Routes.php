@@ -22,14 +22,18 @@ $routes->group('', static function ($routes) {
     $routes->group('account', ['filter' => 'customer_only'], static function ($routes) {
         $routes->get('', 'Customer\\Customer::index', ['as' => 'customer-dashboard']);
         $routes->post('reserve', 'Customer\\Reserve::process_reservation', ['as' => 'customer-reserve-process']);
-        $routes->get('reserve/(:num)', 'Customer\\Reserve::index/$1', ['as' => 'customer-reserve']);
         $routes->post('reserve/set-boarded', 'Customer\\Reserve::set_status', ['as' => 'customer-schedule-set-status']);
+        $routes->get('reserve/future-date', 'Customer\\Reserve::future', ['as' => 'customer-reserve-future']);
+        $routes->post('reserve/future-date', 'Customer\\Reserve::future_redirect', ['as' => 'customer-reserve-future-redirect']);
+        $routes->get('reserve/(:num)', 'Customer\\Reserve::index/$1', ['as' => 'customer-reserve']);
     });
     $routes->group('operator', ['filter' => 'operator_only'], static function ($routes) {
         $routes->get('', 'Operator\\Operator::index', ['as' => 'operator-dashboard']);
         $routes->post('', 'Operator\\Reserve::accept', ['as' => 'operator-reserve-accept']);
         $routes->post('schedule/set-status', 'Operator\\Schedules::set_status', ['as' => 'operator-schedule-set-status']);
         $routes->get('schedule/set-arrived', 'Operator\\Schedules::set_arrived', ['as' => 'operator-schedule-set-arrived']);
+        $routes->get('customers', 'Operator\\Customers::index', ['as' => 'operator-customer-list']);
+        $routes->get('sales', 'Operator\\Sales::index', ['as' => 'operator-sales']);
     });
     $routes->group('admin', ['filter' => 'admin_only'], static function ($routes) {
         $routes->get('', 'Admin\\Admin::index', ['as' => 'admin-dashboard']);
@@ -39,6 +43,9 @@ $routes->group('', static function ($routes) {
         $routes->get('users/travel-history/(:num)', 'Admin\\Users::travel_history/$1', ['as' => 'admin-users-travel-history']);
         $routes->get('users/(:alpha)', 'Admin\\Users::users_list/$1', ['as' => 'users-list']);
         $routes->get('reservations', 'Admin\\Users::reservations', ['as' => 'admin-reservations']);
+        $routes->get('schedules/all', 'Admin\\Schedules::index', ['as' => 'admin-schedules']);
+        $routes->get('schedules/generate-schedule', 'Admin\\Schedules::generate_schedule', ['as' => 'admin-generate-schedule']);
+        $routes->post('schedules/generate-schedule', 'Admin\\Schedules::generate', ['as' => 'admin-generate-schedule-action']);
     });
 
     $routes->post('notification/mark-seen/(:num)', 'Notifications::mark_seen/$1', ['as' => 'notifications-mark_seen']);

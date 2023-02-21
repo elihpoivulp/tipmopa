@@ -57,7 +57,7 @@
                                             <td>
                                                 <?php
                                                 $start = 'tti_start';
-                                                if ($reservation['departed_1']) {
+                                                if ($reservation['type'] == 'out' && $reservation['origin'] != 'Terminal') {
                                                     $start = 'itt_start';
                                                 }
                                                 echo date('h:i A', strtotime($reservation[$start]));
@@ -99,7 +99,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="filter">
-                            <small style="margin-right: 20px"><a href="">Reserve future trips</a></small>
+                            <small style="margin-right: 20px"><a href="<?= url_to('customer-reserve-future') ?>">Reserve future trips</a></small>
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">Schedule <span>| Today</span></h5>
@@ -114,7 +114,7 @@
                                             <?= $trip['boat_name'] ?>
                                         </div>
                                         <?php if ($trip['departed_2'] != 1): ?>
-                                            <?php if (in_array($trip['schedule_id'], $reservation_columns)): ?>
+                                            <?php if (in_array($trip['schedule_id'], get_reserved_by_user($trip['schedule_id'], 'out'))): ?>
                                                 Reserved
                                             <?php else: ?>
                                                 <a href="javascript:void(0);" data-bs-toggle="modal"
@@ -129,7 +129,7 @@
                             <h6>Going to <?= get_location(); ?></h6>
                             <br>
                             <div class="activity">
-                                <?php foreach ($tti as $trip): ?>
+                                <?php foreach ($tti as $i => $trip): ?>
                                     <div class="activity-item d-flex">
                                         <div class="activite-label"><?= date('h:i a', strtotime($trip['tti_start'])); ?></div>
                                         <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
@@ -137,7 +137,7 @@
                                             <?= $trip['boat_name'] ?>
                                         </div>
                                         <?php if ($trip['departed_1'] != 1): ?>
-                                            <?php if (in_array($trip['schedule_id'], $reservation_columns)): ?>
+                                            <?php if (in_array($trip['schedule_id'], get_reserved_by_user($trip['schedule_id']))): ?>
                                                 Reserved
                                             <?php else: ?>
                                                 <a href="javascript:void(0);" data-bs-toggle="modal"

@@ -86,7 +86,7 @@
                                         <i class="bi bi-cart"></i>
                                     </div>
                                     <div class="ps-3">
-                                        <h6><?= peso_sign() . ' ' . $total_sales_today; ?></h6>
+                                        <h6><?= peso_sign() . ' ' . (is_null($total_sales_today) ? 0 : $total_sales_today); ?></h6>
                                         <span class="text-muted small pt-2 ps-1"><a href="#">See History</a></span>
                                     </div>
                                 </div>
@@ -108,7 +108,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
