@@ -45,6 +45,7 @@ $routes->group('', static function ($routes) {
         $routes->get('users/travel-history/(:num)', 'Admin\\Users::travel_history/$1', ['as' => 'admin-users-travel-history']);
         $routes->get('users/(:alpha)', 'Admin\\Users::users_list/$1', ['as' => 'users-list']);
         $routes->get('reservations', 'Admin\\Users::reservations', ['as' => 'admin-reservations']);
+        $routes->get('sales', 'Admin\\Sales::index', ['as' => 'admin-sales']);
         $routes->get('schedules/all', 'Admin\\Schedules::index', ['as' => 'admin-schedules']);
         $routes->get('schedules/generate-schedule', 'Admin\\Schedules::generate_schedule', ['as' => 'admin-generate-schedule']);
         $routes->post('schedules/generate-schedule', 'Admin\\Schedules::generate', ['as' => 'admin-generate-schedule-action']);

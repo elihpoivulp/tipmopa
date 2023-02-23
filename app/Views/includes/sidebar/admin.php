@@ -12,6 +12,12 @@
                 <span>Reservations</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $active == 'sales' ? '' : 'collapsed'; ?>" href="<?= url_to('admin-sales'); ?>">
+                <i class="bi bi-currency-dollar"></i>
+                <span>Sales</span>
+            </a>
+        </li>
 
         <li class="nav-heading">Maintenance</li>
         <li class="nav-item">

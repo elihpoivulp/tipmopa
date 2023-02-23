@@ -17,12 +17,23 @@ class Users extends BaseController
     public function users_list($user_type): string
     {
         $user_model = model(User::class);
+        $reservation_model = model(Reservation::class);
+        $stat = $reservation_model->get_customers_monthly_stat();
+        $monthly_customers = [];
+        $months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        foreach ($stat as $item) {
+            $monthly_customers[$item['location']][$months[$item['mth']]][] = [
+                'count' => $item['cnt']
+            ];
+        }
         return view('includes/page-header') .
             $this->get_heading() .
             get_sidebar() .
             view('account/admin/user_list', [
                 'user_list' => $user_model->where('role', $this->user_type_roles[$user_type])->findAll(),
-                'user_type' => $user_type
+                'user_type' => $user_type,
+                'monthly_customers' => $monthly_customers,
+                'total_customers' => array_sum(array_column($stat, 'cnt'))
             ]) .
             view('includes/footer');
     }
