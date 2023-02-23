@@ -21,6 +21,7 @@ $routes->post('register', 'Register::action');
 $routes->group('', static function ($routes) {
     $routes->group('account', ['filter' => 'customer_only'], static function ($routes) {
         $routes->get('', 'Customer\\Customer::index', ['as' => 'customer-dashboard']);
+        $routes->get('schedules', 'Customer\\Schedules::index', ['as' => 'customer-schedules']);
         $routes->post('reserve', 'Customer\\Reserve::process_reservation', ['as' => 'customer-reserve-process']);
         $routes->post('reserve/set-boarded', 'Customer\\Reserve::set_status', ['as' => 'customer-schedule-set-status']);
         $routes->get('reserve/future-date', 'Customer\\Reserve::future', ['as' => 'customer-reserve-future']);
@@ -34,6 +35,7 @@ $routes->group('', static function ($routes) {
         $routes->get('schedule/set-arrived', 'Operator\\Schedules::set_arrived', ['as' => 'operator-schedule-set-arrived']);
         $routes->get('customers', 'Operator\\Customers::index', ['as' => 'operator-customer-list']);
         $routes->get('sales', 'Operator\\Sales::index', ['as' => 'operator-sales']);
+        $routes->get('schedules', 'Operator\\Schedules::index', ['as' => 'operator-schedules']);
     });
     $routes->group('admin', ['filter' => 'admin_only'], static function ($routes) {
         $routes->get('', 'Admin\\Admin::index', ['as' => 'admin-dashboard']);

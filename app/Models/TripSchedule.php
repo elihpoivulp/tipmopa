@@ -47,7 +47,28 @@ class TripSchedule extends Model
         // $this->select_string .= new RawSql(", if(now() <= concat(date_add(now(), interval 1 day), ' 01:59:59'), 1, 0) for_tomorrow");
     }
 
-    public function get_scheduled_today($to_terminal = 0): array
+    public function get_scheduled_today($to_terminal = 0, $id = null): array
+    {
+        $order = 's.itt_start';
+        if ($to_terminal) {
+            $order = 's.tti_start';
+        }
+        $select = $this->select_string;
+        $select .= new RawSql(', if(start_location_id = 1, "Terminal", l.name) as origin_location');
+        $select .= new RawSql(', if(start_location_id != 1, "Terminal", "Isla") as destination_location');
+        $q = $this->select($select)
+            ->join('boats b', 'b.id = trip_schedules.boat_id')
+            ->join('schedules s', 's.id = trip_schedules.schedule_id')
+            ->join('locations l', 'l.id = start_location_id')
+            ->join('users u', 'u.id = b.operator_id')
+            ->where('trip_schedules.schedule_date', date('Y-m-d'))
+            ->orderBy($order);
+        if ($id) {
+            $q->where('b.operator_id', $id);
+        }
+        return $q->findAll();
+    }
+    public function get_customer_scheduled_today($id, $to_terminal = 0): array
     {
         $order = 's.itt_start';
         if ($to_terminal) {
@@ -61,9 +82,10 @@ class TripSchedule extends Model
             ->join('schedules s', 's.id = trip_schedules.schedule_id')
             ->join('locations l', 'l.id = start_location_id')
             ->join('users u', 'u.id = b.operator_id')
+            ->join('reservations r', 'r.trip_schedule_id = trip_schedules.id')
             ->where('trip_schedules.schedule_date', date('Y-m-d'))
-            ->orderBy($order)
-            ->findAll();
+            ->where('r.user_id', $id)
+            ->orderBy($order)->findAll();
     }
 
     public function get_schedule_info_for_booking($schedule_id): array
@@ -79,10 +101,33 @@ class TripSchedule extends Model
             ->first();
     }
 
-    public function get_schedules($to_terminal = 0, $today = false): array
+    public function get_schedules($to_terminal = 0, $today = false, $id = null): array
     {
         if ($today) {
-            return $this->get_scheduled_today($to_terminal);
+            return $this->get_scheduled_today($to_terminal, $id);
+        }
+        $order = 's.itt_start';
+        if ($to_terminal) {
+            $order = 's.tti_start';
+        }
+        $select = $this->select_string;
+        $select .= new RawSql(', if(start_location_id = 1, "Terminal", l.name) as origin_location');
+        $select .= new RawSql(', if(start_location_id = 1, "Isla", "Terminal") as destination_location');
+        $q = $this->select($select)
+            ->join('boats b', 'b.id = trip_schedules.boat_id')
+            ->join('schedules s', 's.id = trip_schedules.schedule_id')
+            ->join('locations l', 'l.id = start_location_id')
+            ->join('users u', 'u.id = b.operator_id')
+            ->orderBy($order);
+        if ($id) {
+            $q->where('b.operator_id', $id);
+        }
+        return $q->findAll();
+    }
+    public function get_customer_schedules($id, $to_terminal = 0, $today = false): array
+    {
+        if ($today) {
+            return $this->get_customer_scheduled_today($to_terminal, $id);
         }
         $order = 's.itt_start';
         if ($to_terminal) {
@@ -96,8 +141,9 @@ class TripSchedule extends Model
             ->join('schedules s', 's.id = trip_schedules.schedule_id')
             ->join('locations l', 'l.id = start_location_id')
             ->join('users u', 'u.id = b.operator_id')
-            ->orderBy($order)
-            ->findAll();
+            ->join('reservations r', 'r.trip_schedule_id = trip_schedules.id')
+            ->where('r.user_id', $id)
+            ->orderBy($order)->findAll();
     }
 
     public function get_upcoming($id = null, $customer = false): ?array

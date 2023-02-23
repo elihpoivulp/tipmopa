@@ -314,6 +314,7 @@ from reservations
             ->where('b.operator_id', $user_id)
             // ->where('reservations.accepted', 0)
             ->orderBy('reservations.id', 'asc')
+            ->groupBy('u.id')
             ->findAll();
     }
 

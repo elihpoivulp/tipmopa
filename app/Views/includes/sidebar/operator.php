@@ -18,6 +18,12 @@
                 <span>Sales</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <?= $active == 'schedules' ? '' : 'collapsed'; ?>" href="<?= url_to('operator-schedules'); ?>">
+                <i class="bi bi-clock"></i>
+                <span>Schedules</span>
+            </a>
+        </li>
 
         <li class="nav-heading">Account</li>
 <!--        <li class="nav-item">-->

@@ -6,14 +6,20 @@
                 <span>Dashboard</span>
             </a>
         </li>
-
-        <li class="nav-heading">Account</li>
         <li class="nav-item">
-            <a class="nav-link collapsed" href="<?= current_url() . '/profile'; ?>">
-                <i class="bi bi-person"></i>
-                <span>Profile</span>
+            <a class="nav-link <?= $active == 'schedules' ? '' : 'collapsed'; ?>" href="<?= url_to('customer-schedules'); ?>">
+                <i class="bi bi-clock"></i>
+                <span>Schedules</span>
             </a>
         </li>
+
+        <li class="nav-heading">Account</li>
+<!--        <li class="nav-item">-->
+<!--            <a class="nav-link collapsed" href="--><?php //= current_url() . '/profile'; ?><!--">-->
+<!--                <i class="bi bi-person"></i>-->
+<!--                <span>Profile</span>-->
+<!--            </a>-->
+<!--        </li>-->
         <li class="nav-item">
             <form action="<?= url_to('logout'); ?>" method="post" id="logout_form">
                 <?= csrf_field() ?>

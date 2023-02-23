@@ -18,9 +18,27 @@ class Schedules extends BaseController
         $this->sailing_boat = model(SailingBoat::class);
     }
 
-    public function index()
+    public function index(): string
     {
-        //
+        $trip_schedule_model = model(TripSchedule::class);
+        if ($this->request->getGet('all_time')) {
+            $itt = $trip_schedule_model->get_schedules(0, false, session()->get('id'));
+            $tti = $trip_schedule_model->get_schedules(1, false, session()->get('id'));
+            $filtered = true;
+        } else {
+            $itt = $trip_schedule_model->get_scheduled_today(0, session()->get('id'));
+            $tti = $trip_schedule_model->get_scheduled_today(1, session()->get('id'));
+            $filtered = false;
+        }
+        return view('includes/page-header') .
+            $this->get_heading() .
+            get_sidebar() .
+            view('account/operator/schedules', [
+                'itt' => $itt,
+                'tti' => $tti,
+                'filtered' => $filtered
+            ]) .
+            view('includes/footer');
     }
 
     public function set_status(): RedirectResponse
